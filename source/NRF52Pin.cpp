@@ -210,7 +210,7 @@ void NRF52Pin::disconnect()
 
     // Reset status flags to zero, but retain preferred TouchSense and Polarity mode.
     obj = NULL;
-    status &= (IO_STATUS_CAPACITATIVE_TOUCH | IO_STATUS_ACTIVE_HI);
+    status &= (IO_STATUS_CAPACITATIVE_TOUCH | IO_STATUS_ACTIVE_HI | IO_STATUS_WAKE_ON_ACTIVE);
 }
 
 /**
