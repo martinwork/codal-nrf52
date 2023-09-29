@@ -320,6 +320,8 @@ void NRF52ADCChannel::demux(ManagedBuffer dmaBuffer, int offset, int skip, int o
     if (length <= offset)
         return;
 
+    DMESG("NRF52ADCChannel::demux %p output %p", this, &output);
+
     // Rewind end pointer to our last sample in the buffer. (likley one iteration)
     do end--;
     while ((end - data) % skip);
@@ -372,6 +374,8 @@ void NRF52ADCChannel::demux(ManagedBuffer dmaBuffer, int offset, int skip, int o
             }
         }
     }
+
+    DMESG("NRF52ADCChannel::demux EXIT");
 }
 
 /**
