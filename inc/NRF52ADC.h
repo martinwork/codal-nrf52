@@ -72,6 +72,8 @@ private:
     uint8_t             channel;
     uint8_t             gain;
     uint8_t             bias;
+
+    static uint8_t debug_serial_number;
  
 public:
     DataStream      output;

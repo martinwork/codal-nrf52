@@ -60,6 +60,8 @@ extern "C" void SAADC_IRQHandler()
         nrf52_adc_driver->irq();
 }
 
+uint8_t NRF52ADCChannel::debug_serial_number = 0;
+
 /**
  * Constructor
  * @param adc reference to the ADC hardware used by this channel
@@ -338,6 +340,8 @@ void NRF52ADCChannel::demux(ManagedBuffer dmaBuffer, int offset, int skip, int o
             // Push the DMA buffer directly upstream and we're done.
             buffer = dmaBuffer;
             size = buffer.length();
+            buffer[0] = debug_serial_number;
+            debug_serial_number++;
             output.pullRequest();
 
         }else {
@@ -370,7 +374,11 @@ void NRF52ADCChannel::demux(ManagedBuffer dmaBuffer, int offset, int skip, int o
                 }
 
                 if (size == l)
+                {
+                    buffer[0] = debug_serial_number;
+                    debug_serial_number++;
                     output.pullRequest();
+                }
             }
         }
     }
