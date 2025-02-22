@@ -370,7 +370,7 @@ void NRF52ADCChannel::demux(ManagedBuffer dmaBuffer, int offset, int skip, int o
             buffer = dmaBuffer;
             size = buffer.length();
             buffer[0] = debugCount++;
-            DMESG("demux %d", (int)(unsigned) debugCount);
+            DMESG("demux %d", (int)(unsigned) buffer[0]);
             output.pullRequest();
 
         }else {
@@ -405,7 +405,7 @@ void NRF52ADCChannel::demux(ManagedBuffer dmaBuffer, int offset, int skip, int o
                 if (size == l)
                 {
                     buffer[0] = debugCount++;
-                    DMESG("demux %d", (int)(unsigned) debugCount);
+                    DMESG("demux %d", (int)(unsigned) buffer[0]);
                     output.pullRequest();
                 }
             }
