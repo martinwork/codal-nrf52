@@ -77,6 +77,8 @@ NRF52ADCChannel::NRF52ADCChannel(NRF52ADC &adc, uint8_t channel) : adc(adc), sta
 
     // Define our output stream as non-blocking.
     output.setBlocking(false);
+
+    debugCount = 0;
 }
 
 /**
@@ -367,6 +369,8 @@ void NRF52ADCChannel::demux(ManagedBuffer dmaBuffer, int offset, int skip, int o
             // Push the DMA buffer directly upstream and we're done.
             buffer = dmaBuffer;
             size = buffer.length();
+            buffer[0] = debugCount++;
+            DMESG("demux %d", (int)(unsigned) debugCount);
             output.pullRequest();
 
         }else {
@@ -399,7 +403,11 @@ void NRF52ADCChannel::demux(ManagedBuffer dmaBuffer, int offset, int skip, int o
                 }
 
                 if (size == l)
+                {
+                    buffer[0] = debugCount++;
+                    DMESG("demux %d", (int)(unsigned) debugCount);
                     output.pullRequest();
+                }
             }
         }
     }
