@@ -159,6 +159,7 @@ int NRF52ADCChannel::setBufferSize(int bufferSize)
  */
 void NRF52ADCChannel::enable()
 {
+    DMESG("ADCChannel: %p enable", this);
     status |= NRF52_ADC_CHANNEL_STATUS_ENABLED;
 }
 
@@ -167,6 +168,7 @@ void NRF52ADCChannel::enable()
  */
 void NRF52ADCChannel::disable()
 {
+    DMESG("ADCChannel: %p disable", this);
     status &= ~NRF52_ADC_CHANNEL_STATUS_ENABLED;
 }
 
@@ -201,6 +203,7 @@ bool NRF52ADCChannel::isConnected()
  */
 ManagedBuffer NRF52ADCChannel::pull()
 {
+    DMESG("ADCChannel: %p pull", this);
     return buffer;
 }
 
@@ -748,6 +751,7 @@ int NRF52ADC::activateChannel(NRF52ADCChannel *channel)
 
     if (!channel->isEnabled())
     {
+        DMESG("MicroBitAudio::activateChannel %p", channel);
         stopRunning();
         channel->enable();
         startRunning();
