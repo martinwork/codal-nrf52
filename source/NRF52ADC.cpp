@@ -203,7 +203,7 @@ bool NRF52ADCChannel::isConnected()
  */
 ManagedBuffer NRF52ADCChannel::pull()
 {
-    DMESG("ADCChannel: %p pull", this);
+    //DMESG("ADCChannel: %p pull", this);
     return buffer;
 }
 
@@ -347,14 +347,21 @@ void NRF52ADCChannel::demux(ManagedBuffer dmaBuffer, int offset, int skip, int o
     // If we're not enabled, or in a warm-up period, then nothing to do.
     if ((status & NRF52_ADC_CHANNEL_STATUS_ENABLED) == 0 || startupDelay)
     {
-        if(startupDelay) startupDelay--;
+        if(startupDelay)
+        {
+            //DMESG("demux startupDelay %d", (int) startupDelay);
+            startupDelay--;
+        }
         return;
     }
 
     // If this buffer is too shot to contain information for us, ignore it.
     // n.b. The above test is safe, as a short buffer implies that our lastSample is already up to date.
     if (length <= offset)
+    {
+        //DMESG("demux short");
         return;
+    }
 
     // Rewind end pointer to our last sample in the buffer. (likley one iteration)
     do end--;
@@ -373,7 +380,7 @@ void NRF52ADCChannel::demux(ManagedBuffer dmaBuffer, int offset, int skip, int o
             buffer = dmaBuffer;
             size = buffer.length();
             buffer[0] = debugCount++;
-            DMESG("demux %d", (int)(unsigned) buffer[0]);
+            //DMESG("demux %d", (int)(unsigned) buffer[0]);
             output.pullRequest();
 
         }else {
@@ -408,7 +415,7 @@ void NRF52ADCChannel::demux(ManagedBuffer dmaBuffer, int offset, int skip, int o
                 if (size == l)
                 {
                     buffer[0] = debugCount++;
-                    DMESG("demux %d", (int)(unsigned) buffer[0]);
+                    //DMESG("demux %d", (int)(unsigned) buffer[0]);
                     output.pullRequest();
                 }
             }
