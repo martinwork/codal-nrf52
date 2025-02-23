@@ -72,6 +72,8 @@ private:
     uint8_t             gain;
     uint8_t             bias;
     uint8_t             startupDelay;
+
+    uint8_t debugCount;
  
 public:
     DataStream      output;
