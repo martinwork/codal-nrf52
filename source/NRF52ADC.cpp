@@ -86,6 +86,8 @@ NRF52ADCChannel::NRF52ADCChannel(NRF52ADC &adc, uint8_t channel) : adc(adc), sta
  */
 void NRF52ADCChannel::dataWanted(int wanted)
 {
+    DMESG("NRF52ADCChannel::dataWanted %p %d", this, wanted);
+
     bool enabled = (status & NRF52_ADC_CHANNEL_STATUS_ENABLED);
 
     if (wanted == DATASTREAM_WANTED && !enabled)
@@ -93,6 +95,8 @@ void NRF52ADCChannel::dataWanted(int wanted)
 
     if ((wanted == DATASTREAM_NOT_WANTED || wanted == DATASTREAM_DONT_CARE) && enabled)
         disable();
+
+    DMESG("NRF52ADCChannel::dataWanted %p, enabledChannels %d", this, nrf52_adc_driver->enabledChannels);
 }
 
 /**
@@ -203,7 +207,7 @@ bool NRF52ADCChannel::isConnected()
  */
 ManagedBuffer NRF52ADCChannel::pull()
 {
-    //DMESG("ADCChannel: %p pull", this);
+    DMESG("ADCChannel: %p pull", this);
     return buffer;
 }
 
@@ -349,7 +353,7 @@ void NRF52ADCChannel::demux(ManagedBuffer dmaBuffer, int offset, int skip, int o
     {
         if(startupDelay)
         {
-            //DMESG("demux startupDelay %d", (int) startupDelay);
+            DMESG("demux %p startupDelay %d", this, (int) startupDelay);
             startupDelay--;
         }
         return;
@@ -359,7 +363,7 @@ void NRF52ADCChannel::demux(ManagedBuffer dmaBuffer, int offset, int skip, int o
     // n.b. The above test is safe, as a short buffer implies that our lastSample is already up to date.
     if (length <= offset)
     {
-        //DMESG("demux short");
+        DMESG("demux %p short", this);
         return;
     }
 
@@ -380,7 +384,7 @@ void NRF52ADCChannel::demux(ManagedBuffer dmaBuffer, int offset, int skip, int o
             buffer = dmaBuffer;
             size = buffer.length();
             buffer[0] = debugCount++;
-            //DMESG("demux %d", (int)(unsigned) buffer[0]);
+            DMESG("demux %p %d enabledChannels %d", this, (int)(unsigned) buffer[0], nrf52_adc_driver->enabledChannels);
             output.pullRequest();
 
         }else {
@@ -415,7 +419,7 @@ void NRF52ADCChannel::demux(ManagedBuffer dmaBuffer, int offset, int skip, int o
                 if (size == l)
                 {
                     buffer[0] = debugCount++;
-                    //DMESG("demux %d", (int)(unsigned) buffer[0]);
+                    DMESG("demux %p %d enabledChannels %d", this, (int)(unsigned) buffer[0], nrf52_adc_driver->enabledChannels);
                     output.pullRequest();
                 }
             }
