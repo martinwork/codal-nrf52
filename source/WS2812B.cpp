@@ -23,6 +23,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include "WS2812B.h"
+#include "codaldmesg.h"
 
 using namespace codal;
 
@@ -112,12 +113,19 @@ ManagedBuffer WS2812B::pull()
 
     // If we still have data to send, indicate this to our downstream component
     if (samplesSent < totalSamples)
+    {
+        DMESG( "pR");
         downstream->pullRequest();
+    }
     
     // If we have completed playback and blockingbehaviour was requested, wake the fiber that is blocked waiting.
     if ((samplesSent >= totalSamples) && blockingPlayout)
+    {
+        DMESG( "pN");
         lock.notify();
+    }
 
+    DMESG( "p%d %d", (int) *(uint8_t *) data, samplesSent);
     return buffer;
 }
 
@@ -165,6 +173,9 @@ void WS2812B::play(ManagedBuffer b)
 
 void WS2812B::_play(const void *data, int length, bool mode)
 {
+    DMESG( "");
+    DMESG( "P%d", (int) *(uint8_t *) data);
+
     if (downstream == NULL || length <= 0)
         return;
 
@@ -176,5 +187,9 @@ void WS2812B::_play(const void *data, int length, bool mode)
     downstream->pullRequest();
 
     if (this->blockingPlayout)
+    {
+        DMESG( "W");
         lock.wait();
+    }
+    DMESG( "D");
 }

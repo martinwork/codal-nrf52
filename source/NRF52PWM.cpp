@@ -1,6 +1,7 @@
 #include "NRF52PWM.h"
 #include "nrf.h"
 #include "cmsis.h"
+#include "codaldmesg.h"
 
 using namespace codal;
 
@@ -236,13 +237,19 @@ int NRF52PWM::tryPull(uint8_t b)
         // hardware double buffer so that we don't stall.
         if(dataReady)
         {
+            DMESG( "SR", (int) dataReady);
             dataReady--;
             pullRequest();
+        }
+        else
+        {
+            DMESG( "S");
         }
         return 0;
     }
 
     if (dataReady){
+        DMESG( "R", (int) dataReady);
         buffer[b] = upstream.pull();
         PWM.SEQ[b].PTR = (uint32_t) buffer[b].getBytes();
         PWM.SEQ[b].CNT = buffer[b].length() / 2;
@@ -256,12 +263,18 @@ int NRF52PWM::tryPull(uint8_t b)
     // Streaming mode is double buffered, so schedule ourself to stop after the next buffer is played, if we're so configured.
     if (streaming && active && !repeatOnEmpty)
     {
+        DMESG( "E");
         // The PWM doesn't seem to respond to changes in the SHORTS register while it's active...
         // instead, we provide an empty buffer to prevent partial repetition of any previous buffer.
         PWM.SEQ[b].PTR = (uint32_t) emptyBuffer;
         PWM.SEQ[b].CNT = (uint32_t) NRF52PWM_EMPTY_BUFFERSIZE;
         stopStreamingAfterBuf = 1;
     }
+    else
+    {
+        DMESG( "F", (int) b);
+    }
+
     return 0;
 }
 
@@ -275,6 +288,7 @@ int NRF52PWM::pullRequest()
     // If we're not running in streaming mode, simply pull the requested buffer and schedule for DMA.
     if (!streaming)
     {
+        DMESGN( "t0");
         int result = tryPull(0);
         if (result || repeatOnEmpty)
             PWM.TASKS_SEQSTART[0] = 1;
@@ -285,23 +299,37 @@ int NRF52PWM::pullRequest()
     // pulling the first buffer...
     if (streaming && !active)
     {
+        DMESG( "rB");
         active = true;
 
+        DMESGN( bufferPlaying ? "t1" : "t0");
         tryPull(bufferPlaying);
         bufferPlaying = (bufferPlaying + 1) % 2;
 
         if (bufferPlaying !=0 && dataReady)
         {
+            DMESGN( bufferPlaying ? "t1" : "t0");
             tryPull(bufferPlaying);
             bufferPlaying = (bufferPlaying + 1) % 2;
         }
 
         // Check if we've preloaded both buffers
         if (bufferPlaying == 0)
+        {
+            DMESG( "rS");
             PWM.TASKS_SEQSTART[0] = 1;
+        }
         else
+        {
+            DMESG( "rA");
             active = false;
+        }
     }
+    else
+    {
+        DMESG( "rD");
+    }
+
 
     return DEVICE_OK;
 }
@@ -314,7 +342,9 @@ void NRF52PWM::irq()
     // once the sequence has finished playing, load up the next buffer.
     if (PWM.EVENTS_SEQEND[0])
     {
+        DMESGN( "q0");
         bufferPlaying = 1;
+        //DMESGN( " add delay R%d A%d ", (int) dataReady, (int) active);
         tryPull(0);
 
         PWM.EVENTS_SEQEND[0] = 0;
@@ -322,7 +352,9 @@ void NRF52PWM::irq()
 
     if (PWM.EVENTS_SEQEND[1])
     {
+        DMESGN( "q1");
         bufferPlaying = 0;
+        //DMESGN( " add delay R%d A%d ", (int) dataReady, (int) active);
         tryPull(1);
 
         PWM.EVENTS_SEQEND[1] = 0;
