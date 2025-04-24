@@ -208,6 +208,8 @@ void NRF52PWM::setStreamingMode(bool streamingMode, bool repeatOnEmpty)
         PWM.LOOP = 1;
         PWM.SHORTS = PWM_SHORTS_LOOPSDONE_SEQSTART0_Enabled << PWM_SHORTS_LOOPSDONE_SEQSTART0_Pos; 
         PWM.INTENSET = (PWM_INTEN_SEQEND0_Enabled << PWM_INTEN_SEQEND0_Pos ) | (PWM_INTEN_SEQEND1_Enabled << PWM_INTEN_SEQEND1_Pos);
+        //PWM.INTENSET = PWM.INTENSET
+        //  | (PWM_INTEN_SEQSTARTED0_Enabled << PWM_INTEN_SEQSTARTED0_Pos ) | (PWM_INTEN_SEQSTARTED1_Enabled << PWM_INTEN_SEQSTARTED1_Pos);
     }
     else
     {
@@ -339,14 +341,24 @@ int NRF52PWM::pullRequest()
  */
 void NRF52PWM::irq()
 {
+    //if (PWM.EVENTS_SEQSTARTED[0])
+    //{
+    //    PWM.EVENTS_SEQSTARTED[0] = 0;
+    //    DMESGN( "Q0");
+    //}
+
+    //if (PWM.EVENTS_SEQSTARTED[1])
+    //{
+    //    PWM.EVENTS_SEQSTARTED[1] = 0;
+    //    DMESGN( "Q1");
+    //}
+
     // once the sequence has finished playing, load up the next buffer.
     if (PWM.EVENTS_SEQEND[0])
     {
         DMESGN( "q0");
         bufferPlaying = 1;
-        //DMESGN( " add delay R%d A%d ", (int) dataReady, (int) active);
         tryPull(0);
-
         PWM.EVENTS_SEQEND[0] = 0;
     }
 
@@ -354,11 +366,10 @@ void NRF52PWM::irq()
     {
         DMESGN( "q1");
         bufferPlaying = 0;
-        //DMESGN( " add delay R%d A%d ", (int) dataReady, (int) active);
         tryPull(1);
-
         PWM.EVENTS_SEQEND[1] = 0;
     }
+    DMESG( "x");
 }
 
 /**
