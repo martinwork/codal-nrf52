@@ -237,6 +237,12 @@ int NRF52PWM::tryPull(uint8_t b)
         if(dataReady)
         {
             dataReady--;
+
+            if ( dataReady < 0)
+            {
+                target_panic(999);
+            }
+
             pullRequest();
         }
         return 0;
@@ -248,6 +254,11 @@ int NRF52PWM::tryPull(uint8_t b)
         PWM.SEQ[b].CNT = buffer[b].length() / 2;
 
         dataReady--;
+
+        if ( dataReady < 0)
+        {
+            target_panic(998);
+        }
 
         return 1;
     }
