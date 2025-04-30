@@ -40,8 +40,6 @@ private:
     int8_t          stopStreamingAfterBuf;  // When stopping, the last buffer ID to play beforhand. -1 if no stop is scheduled.
     ManagedBuffer   buffer[2];              // The ManagedBuffers currently being used by the PWN hardware
 
-    volatile bool inPullRequest;
-
 public:
 
     // The stream component that is serving our data
