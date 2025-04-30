@@ -41,6 +41,7 @@ NRF52PWM::NRF52PWM(NRF_PWM_Type *module, DataSource &source, float sampleRate, u
     this->repeatOnEmpty = true;
     this->bufferPlaying = 0;
     this->stopStreamingAfterBuf = 0;
+    this->inPullRequest = false;
 
     // Clear empty buffer
     for (int i=0; i<NRF52PWM_EMPTY_BUFFERSIZE; i++)
@@ -297,6 +298,7 @@ int NRF52PWM::pullRequest()
     if (streaming && !active)
     {
         active = true;
+        inPullRequest = true;
 
         tryPull(bufferPlaying);
         bufferPlaying = (bufferPlaying + 1) % 2;
@@ -306,6 +308,8 @@ int NRF52PWM::pullRequest()
             tryPull(bufferPlaying);
             bufferPlaying = (bufferPlaying + 1) % 2;
         }
+        
+        inPullRequest = false;
 
         // Check if we've preloaded both buffers
         if (bufferPlaying == 0)
@@ -322,20 +326,25 @@ int NRF52PWM::pullRequest()
  */
 void NRF52PWM::irq()
 {
+    
     // once the sequence has finished playing, load up the next buffer.
     if (PWM.EVENTS_SEQEND[0])
     {
-        bufferPlaying = 1;
-        tryPull(0);
-
+        if ( !inPullRequest)
+        {
+            bufferPlaying = 1;
+            tryPull(0);
+        }
         PWM.EVENTS_SEQEND[0] = 0;
     }
 
     if (PWM.EVENTS_SEQEND[1])
     {
-        bufferPlaying = 0;
-        tryPull(1);
-
+        if ( !inPullRequest)
+        {
+            bufferPlaying = 0;
+            tryPull(1);
+        }
         PWM.EVENTS_SEQEND[1] = 0;
     }
 }
