@@ -878,11 +878,14 @@ bool NRF52ADC::startRunning()
 
     // Configure channels
     enabledChannels = 0;
+
+    DMESGN("NRF52ADC enabled");
             
     for (int channel = 0; channel < NRF52_ADC_CHANNELS; channel++)
     {
         if ( channels[channel].isEnabled())
         {
+            DMESGN(" %d", channel);
             enabledChannels++;
 
             channels[channel].configureGain();
@@ -896,6 +899,8 @@ bool NRF52ADC::startRunning()
             NRF_SAADC->CH[channel].PSELN = 0;
         }
     }
+        
+    DMESG("");
 
     // Stop sampling if no channels are active.
     if (enabledChannels == 0)
