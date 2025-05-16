@@ -67,6 +67,8 @@ extern "C" void SAADC_IRQHandler()
  */
 NRF52ADCChannel::NRF52ADCChannel(NRF52ADC &adc, uint8_t channel) : adc(adc), status(0), output(*this)
 {
+    debug_count = 0;
+
     this->channel = channel;
     this->size = buffer.length();
     this->bufferSize = NRF52_ADC_DMA_SIZE;
@@ -348,6 +350,10 @@ void NRF52ADCChannel::demux(ManagedBuffer dmaBuffer, int offset, int skip, int o
     // If we're not enabled, or in a warm-up period, then nothing to do.
     if ((status & NRF52_ADC_CHANNEL_STATUS_ENABLED) == 0 || startupDelay)
     {
+        if ( channel == 3)
+        {
+            DMESG("startupDelay %d", (int) startupDelay);
+        }
         if(startupDelay) startupDelay--;
         return;
     }
@@ -373,6 +379,11 @@ void NRF52ADCChannel::demux(ManagedBuffer dmaBuffer, int offset, int skip, int o
             // Push the DMA buffer directly upstream and we're done.
             buffer = dmaBuffer;
             size = buffer.length();
+            if ( channel == 3)
+            {
+                buffer[0] = debug_count++;
+                DMESG("demux %d", (int) buffer[0]);
+            }
             output.pullRequest();
 
         }else {
@@ -405,7 +416,15 @@ void NRF52ADCChannel::demux(ManagedBuffer dmaBuffer, int offset, int skip, int o
                 }
 
                 if (size == l)
+                {
+                    if ( channel == 3)
+                    {
+                        buffer[0] = debug_count++;
+                        DMESG("demux %d", (int) buffer[0]);
+                    }
+
                     output.pullRequest();
+                }
             }
         }
     }
