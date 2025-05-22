@@ -76,6 +76,8 @@ private:
 public:
     DataStream      output;
 
+    uint8_t debug_count;
+
     /**
      * Constructor
      * @param adc reference to the ADC hardware used by this channel
